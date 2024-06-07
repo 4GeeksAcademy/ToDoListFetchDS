@@ -11,6 +11,10 @@ const List = () => {
     let placeHolder = [];
 
     useEffect(() => {
+       getChores() 
+    },[]);
+
+    const getChores = () => {
         fetch("https://playground.4geeks.com/todo/users/DMS")
 
             .then(resp => {
@@ -40,7 +44,7 @@ const List = () => {
                 // Error handling
                 console.error(error);
             });
-    },[]);
+    }
 
     //Functions:
     const addChore = () => {
@@ -66,10 +70,22 @@ const List = () => {
         }
     };
 
-    const removeChore = () => {
-        let newChoreList = choreList.slice(0, -1);
-        setChoreList(newChoreList);
-        console.log(newChoreList);
+    const removeChore = async(id) => {
+        try{
+            const updatedChores = choreList.filter(chore => chore.id !== id)
+            setChoreList(updatedChores)
+            let response = await fetch("https://playground.4geeks.com/todo/todos/" + id, {
+                method:"DELETE"
+            })
+        } catch(error) {
+            console.log("Error removing chore", error)
+            throw new Error
+        }
+        // if (response.status !== 204) {
+        //     alert("Unable to delete current task. Please try again.")
+        // } else {
+        //     getChores()
+        // }
     }
 
     const createUser = () => {
@@ -91,10 +107,9 @@ const List = () => {
                 onChange={(e) => setInput(e.target.value)}
             />
             <button onClick={addChore}>Add Chore</button>
-            <button onClick={removeChore}>Remove Chore</button>
             <ul>
                 {choreList.map((chore, index) => (
-                    <li key={index}>{chore.label}</li>
+                    <li key={index}>{chore.label} <button onClick={() => removeChore(chore.id)}>Remove Chore</button></li>
                 ))}
             </ul>
             {choreList.length == 0 ? <div>No tasks, add a task!</div> : null}
